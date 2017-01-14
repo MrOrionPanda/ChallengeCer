@@ -2,8 +2,23 @@
 
 class Breve {
 
+	public $idPub = null;
+
+	public $idAuteur = null;
+
+	/**
+	Texte affiché dans le flux, si c'est une brève alors c'est le texte, si c'est un article c'est le résumé.
+	*/
 	public $txtShow = null;
-	public $hashtag = array();
+
+	/**
+	Tableau des hashtags de la publication
+	*/
+	public $hashtag = null;
+
+	/**
+	Date de publication.
+	*/
 	public $datePub = null;
 
 	/**
@@ -15,7 +30,7 @@ class Breve {
 	/**
 	Pas la peine d'expliquer
 	*/
-	public function createFromId($id){
+	public static function createFromId($id){
 
 	}
 	/**
@@ -29,8 +44,25 @@ class Breve {
 	Ajoute un Hashtag à la liste
 	$hashtag est un tableau comportant un à plusieurs hashtags
 	*/
-	public function addNewHashtag($hashtag){
-		
+	public function addHashtag($hashtag){
+		$this->hashtag .= $hashtag;
+	}
+
+	/**
+	Moteur de recherche par Hashtag, retourne un tableau de Publications comportant le #
+	*/
+	public static function getPubByHashtag($hashtag){
+	$stmt = myPDO::getInstance()->prepare(<<<SQL
+		SELECT *
+		FROM article
+		WHERE idPub = (SELECT idPub
+					   FROM Hashtag
+					   WHERE hashtag = ?)
+SQL
+);
+	$stmt->execute(array($hashtag));
+	$stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,__CLASS__);
+    return $stmt->fetchAll();
 	}
 
 }
